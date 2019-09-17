@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface PatternAnalysisService {
-    Collection<Item> findByno_of_items(String no_of_items);
+    Collection<TransactionDetails> findByno_of_items(String transaction_holder_name);
 
     Collection<IPAddress> findByName(String transaction_holder_name);
 

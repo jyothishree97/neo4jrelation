@@ -16,15 +16,15 @@ import java.util.List;
 public interface PatternAnalysis extends Neo4jRepository<TransactionDetails,String> {
 
     //The below query is to check if the number of item is greater than 3 and its cost is greater than 10000
-    @Query("Match(i:Item) where i.no_of_items>=3 AND i.item_price>=10000 return i")
-    Collection<Item> findByno_of_items(@Param("no_of_items") String no_of_items);
+    @Query("Match(i:Item)-[c:consists_of]->(t:Transaction) where i.no_of_items>=3 AND i.item_price>=10000 return t ORDER BY t.transaction_id ")
+    Collection<TransactionDetails> findByno_of_items(String transaction_holder_name);
 
-    @Query("Match(i:Ip_address),(t:Transaction) where t.transaction_id=i.id and t.transaction_holder_name={transaction_holder_name} return t,i")
+    @Query("Match(i:Ip_address)-[is:is_used_for]->(t:Transaction) where t.transaction_id=i.id and t.transaction_holder_name={transaction_holder_name} return t")
     List<TransactionDetails> findTransactions(@Param("transaction_holder_name") String transaction_holder_name);
 
     @Query("Match(c:CardDetails) return c")
     List<CardDetails> findCardDetails();
 
-    @Query("Match(t:Transaction),(i:Ip_address),(item:Item) where t.amount=item.item_price and t.transaction_id=i.id and  t.transaction_holder_name={transaction_holder_name} return i.ipv4")
-    Collection<IPAddress> fingByName(@Param("transaction_holder_name") String transaction_holder_name);
+    @Query("Match(ip:Ip_address)-[is:is_used_for]->(t:Transaction) where t.transaction_id=ip.id and t.transaction_holder_name={transaction_holder_name} return ip")
+    Collection<IPAddress> findByName(@Param("transaction_holder_name") String transaction_holder_name);
 }

@@ -3,14 +3,12 @@ package com.stackroute.financialadapterneo4j.service;
 
 import com.stackroute.financialadapterneo4j.domain.CardDetails;
 import com.stackroute.financialadapterneo4j.domain.IPAddress;
-import com.stackroute.financialadapterneo4j.domain.Item;
 import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import com.stackroute.financialadapterneo4j.repositories.PatternAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,20 +24,19 @@ public class PatternAnalysisServiceImplementation implements PatternAnalysisServ
     }
 
     @Override
-    public Collection<Item> findByno_of_items(String no_of_items) {
-        System.out.println("inside service method********" + patternAnalysis.findByno_of_items(no_of_items));
-        return patternAnalysis.findByno_of_items(no_of_items);
+    public Collection<TransactionDetails> findByno_of_items(String transaction_holder_name) {
+        System.out.println("inside service method********" + patternAnalysis.findByno_of_items(transaction_holder_name));
+        return patternAnalysis.findByno_of_items(transaction_holder_name);
     }
 
     @Override
     public Collection<IPAddress> findByName(String transaction_holder_name){
-         Collection<IPAddress> ipAddress=patternAnalysis.fingByName(transaction_holder_name);
+         Collection<IPAddress> ipAddress=patternAnalysis.findByName(transaction_holder_name);
          return ipAddress;
     }
 
     @Override
     public List<TransactionDetails> findTransactions(String transaction_holder_name){
-        List<TransactionDetails> details=patternAnalysis.findTransactions(transaction_holder_name);
         return patternAnalysis.findTransactions(transaction_holder_name);
         }
 

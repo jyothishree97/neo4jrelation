@@ -31,14 +31,14 @@ public class TransactionDetails {
     public String transaction_holder_email;
     public String transaction_holder_phn_no;
     public String amount;
-    @Relationship(type = "IS_SHIPPING_ADDRESS",direction = Relationship.OUTGOING)
+    @Relationship(type = "is_shipping_address",direction = Relationship.OUTGOING)
     private List<ShippingDetails> shippingDetails=new ArrayList<>();
-    @Relationship(type = "IS_BILLING_ADDRESS",direction = Relationship.OUTGOING)
+    @Relationship(type = "is_billing_address",direction = Relationship.OUTGOING)
     private List<BillingDetails> billingDetails=new ArrayList<>();
-    @Relationship(type = "IS_CONSISTS_OF",direction = Relationship.INCOMING)
+    @Relationship(type = "is_consists_of",direction = Relationship.INCOMING)
     private List<Item> item= new ArrayList<>();
-    @Relationship(type = "HAS_A_TRANSACTION",direction = Relationship.INCOMING)
+    @Relationship(type = "has_a_transaction",direction = Relationship.INCOMING)
     private List<CardDetails> cardDetails=new ArrayList<>();
-    @Relationship(type = "IS_USED_FOR",direction = Relationship.INCOMING)
+    @Relationship(type = "is_used_for",direction = Relationship.INCOMING)
     private List<IPAddress> ipAddress = new ArrayList<>();
 }

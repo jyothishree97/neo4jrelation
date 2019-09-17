@@ -26,7 +26,7 @@ public class Item  {
     private int item_price;
     private int no_of_items;
     private String parent_id;
-    @Relationship(type = "HAS_A",direction = Relationship.INCOMING)
+    @Relationship(type = "has_a",direction = Relationship.INCOMING)
     List<SellerDetails> sellerDetails=new ArrayList<>();
 
 }

@@ -1,0 +1,30 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+#    expose:
+#      - 7474
+    container_name: neo4j_docker
+    network_mode: "host"
+    hostname: localhost
+    restart: always
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/import:/import
+    environment:
+      - NEO4J_AUTH=neo4j/1234
+      - NEO4J_dbms_allow_format_migration=true
+
+  financialadapter-neo4j:
+    container_name: financial-service
+    build: .
+    hostname: localhost
+    network_mode: "host"
+    ports:
+      - 8081:8081
+    depends_on:
+      - neo4j
+    restart: always

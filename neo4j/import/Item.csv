@@ -1,0 +1,11 @@
+item_id,item_name,item_price,no_of_items,parent_id
+1,charger,1000,2,1
+2,Ear_phn,1200,3,2
+3,Ear_ring,4000,4,3
+4,Bracelet,6000,5,4
+5,Mobile,18000,7,5
+6,Bluetooth,2000,8,6
+7,Iphone,35000,4,7
+8,Laptop,40000,6,8
+9,Iphone,35000,2,9
+10,Mobile,20000,6,10

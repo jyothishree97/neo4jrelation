@@ -7,6 +7,8 @@ import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import com.stackroute.financialadapterneo4j.repositories.PatternAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 
@@ -35,16 +37,17 @@ public class PatternAnalysisServiceImplementation implements PatternAnalysisServ
          Collection<IPAddress> ipAddress=patternAnalysis.findByName(transaction_holder_name);
          return ipAddress;
     }
+//    @Autowired(required = true)
+//    KafkaTemplate<String,TransactionDetails> kafkaTemplate;
 
     @Override
+//    @KafkaListener(topics = "financer",groupId = "json",containerFactory = "kafkaListener")
+
     public List<TransactionDetails> findTransactions(String transaction_holder_name){
         return patternAnalysis.findTransactions(transaction_holder_name);
         }
 
-    @Override
-    public List<CardDetails> findCardDetails() {
-        return patternAnalysis.findCardDetails();
-    }
+
 
     @Override
     public TransactionDetails saveTransaction(TransactionDetails transactionDetails) {

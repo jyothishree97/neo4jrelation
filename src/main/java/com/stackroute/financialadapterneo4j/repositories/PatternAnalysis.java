@@ -6,12 +6,14 @@ import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
 
 @Repository
+
 public interface PatternAnalysis extends Neo4jRepository<TransactionDetails,String> {
 
     //The below query is to check if the number of item is greater than 3 and its cost is greater than 10000
@@ -21,8 +23,6 @@ public interface PatternAnalysis extends Neo4jRepository<TransactionDetails,Stri
     @Query("Match(i:Ip_address)-[is:is_used_for]->(t:Transaction) where t.transaction_id=i.id and t.transaction_holder_name={transaction_holder_name} return t")
     List<TransactionDetails> findTransactions(@Param("transaction_holder_name") String transaction_holder_name);
 
-    @Query("Match(c:CardDetails) return c")
-    List<CardDetails> findCardDetails();
 
     @Query("Match(t:transaction) where t.transaction_holder_name={transaction_holder_name} return t")
     List<TransactionDetails> savedDetails(@Param("transaction_holder_name") String transaction_holder_name);

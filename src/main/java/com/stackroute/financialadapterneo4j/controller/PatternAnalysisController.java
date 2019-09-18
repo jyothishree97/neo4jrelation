@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -69,23 +70,24 @@ public class PatternAnalysisController {
         return new ResponseEntity<>(patternAnalysisService.savedDetails(transaction_holder_name), HttpStatus.OK);
     }
 
-    @GetMapping("carddetails")
-    public ResponseEntity<Iterable<CardDetails>> getCardDetails(String card_no) {
-        Iterable<CardDetails> cardDetails = patternAnalysisService.findCardDetails();
+    @GetMapping("carddetails/{transaction_holder_name}")
+    public ResponseEntity<Iterable<CardDetails>> getCardDetails(@PathVariable("transaction_holder_name") String transaction_holder_name) {
+        Iterable<CardDetails> cardDetails =cardDetailService.findCardDetails(transaction_holder_name);
         System.out.println(cardDetails);
-        return new ResponseEntity<>(patternAnalysisService.findCardDetails(), HttpStatus.OK);
+        return new ResponseEntity<>(cardDetailService.findCardDetails(transaction_holder_name), HttpStatus.OK);
     }
 
     @Autowired
     IpAddressRepository repository;
     BillingDetailsRepository billingDetailsRepository;
 
+    @Autowired
+    KafkaTemplate<String, POJO> kafkaTemplate;
 
     @PostMapping("transactions")
-    public Activity saveTransactions(@RequestBody TransactionDetails transactionDetails) {
+    public void saveTransactions(@RequestBody TransactionDetails transactionDetails) {
         List<TransactionDetails> list = new ArrayList();
         list = patternAnalysisService.findTransactions(transactionDetails.getTransaction_holder_name());
-
         String newTransactionTimeStamp = transactionDetails.getTimestamp();
         String holder = transactionDetails.getTransaction_holder_name();
         logger.info(holder);
@@ -98,10 +100,12 @@ public class PatternAnalysisController {
                 oldTransactionTimeStamp = oldTransaction.getTimestamp();
             }
         }
-
+        String message=null;
+        double distance=0;
+        long Timestampdiff=0;
         if (!oldTransactionTimeStamp.isEmpty() || !oldTransactionTimeStamp.isBlank()) {
             logger.info("Old Transaction TimeStamp: " + oldTransactionTimeStamp);
-            long Timestampdiff = itemService.calculateDateDifference(oldTransactionTimeStamp, newTransactionTimeStamp);
+            Timestampdiff = itemService.calculateDateDifference(oldTransactionTimeStamp, newTransactionTimeStamp);
             System.out.println("Difference between two timestamps is: " + Timestampdiff);
 
 
@@ -135,23 +139,31 @@ public class PatternAnalysisController {
             }
 
 
-            double distance = itemService.distance(latitude1, longitude1, latitude2, longitude2, "K");
+            distance = itemService.distance(latitude1, longitude1, latitude2, longitude2, "K");
             System.out.println("Distance between two locations is :" + distance);
+
+
 
             if (Timestampdiff > 3 && distance > 1000) {
                 System.out.println("fraudulent transaction");
+                message="fraudulent transaction";
+
             } else {
                 System.out.println("genuine transaction");
-
+                message="genuine transaction";
             }
         }
 
-
         TransactionDetails obj = patternAnalysisService.saveTransaction(transactionDetails);
         System.out.println(obj);
-        Activity activity=activity().actor("Finance").verb("Post").object(object("Fraud Detect Message").content(String.valueOf(obj))).get();
+        Activity activity=activity().object(String.valueOf(obj)).get();
         System.out.println(activity);
-        return activity;
+        POJO pojo=new POJO("finance","post",new ObjectTypes("FinanceMessage",String.valueOf(obj)),distance,Timestampdiff,message);
+        kafkaTemplate.send("finance",pojo);
+
+
+
+
     }
 
     @PostMapping("Ipaddress")

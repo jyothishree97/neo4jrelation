@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @Getter
 @Setter
 @NodeEntity(label = "Billing")
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id",scope=BillingDetails.class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = BillingDetails.class)
 
 public class BillingDetails {
 

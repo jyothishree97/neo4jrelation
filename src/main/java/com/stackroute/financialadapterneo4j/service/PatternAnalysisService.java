@@ -4,11 +4,14 @@ import com.stackroute.financialadapterneo4j.domain.CardDetails;
 import com.stackroute.financialadapterneo4j.domain.IPAddress;
 import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import org.springframework.data.repository.query.Param;
+import org.springframework.kafka.annotation.KafkaListener;
 
 import java.util.Collection;
 import java.util.List;
 
+
 public interface PatternAnalysisService {
+
     Collection<TransactionDetails> findByno_of_items(String transaction_holder_name);
 
     Collection<IPAddress> findByName(String transaction_holder_name);
@@ -16,8 +19,6 @@ public interface PatternAnalysisService {
     TransactionDetails saveTransaction(TransactionDetails transactionDetails);
 
     List<TransactionDetails> findTransactions(String transaction_holder_name);
-
-    List<CardDetails> findCardDetails();
 
     List<TransactionDetails> savedDetails(String transaction_holder_name);
 

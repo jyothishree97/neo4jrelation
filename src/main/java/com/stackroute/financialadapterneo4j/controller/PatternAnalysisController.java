@@ -82,9 +82,24 @@ public class PatternAnalysisController {
             oldTransactionTimeStamp = oldTransaction.getTimestamp();
         }
         logger.info("Old Transaction TimeStamp: " + oldTransactionTimeStamp);
+        long Timestampdiff=itemService.calculateDateDifference(oldTransactionTimeStamp,newTransactionTimeStamp);
+        System.out.println("Difference between two timestamps is: " + Timestampdiff);
+
         Location currentTransactionLocation = null;
+
+
+        Double latitude1=null;
+        Double longitude1=null;
+        Double latitude2=null;
+        Double longitude2=null;
+
+
         for (IPAddress ipAddress: transactionDetails.getIpAddress()) {
             currentTransactionLocation = itemService.getLocation(ipAddress.getIpv4());
+             latitude1= currentTransactionLocation.getLatitude();
+             longitude1 = currentTransactionLocation.getLongitude();
+            System.out.println("Latitude of current location is"  + latitude1);
+            System.out.println("Longitude of current location is " + longitude1);
         }
 
 
@@ -96,13 +111,33 @@ public class PatternAnalysisController {
 //        });
         for (IPAddress ipAddress : patternAnalysisService.findByName(transactionDetails.transaction_holder_name)) {
             Location previousLocation = itemService.getLocation(ipAddress.getIpv4());
-            itemService.compareLocations(currentTransactionLocation, previousLocation);
+             latitude2=previousLocation.getLatitude();
+             longitude2=previousLocation.getLongitude();
+            System.out.println("Latitude of previous location is" + latitude2);
+            System.out.println("longitude of previous location is" + longitude2);
+//            itemService.compareLocations(currentTransactionLocation, previousLocation);
+
+//            itemService.calculateDateDifference(newTransactionTimeStamp,oldTransactionTimeStamp);
+        }
+
+
+        double distance=itemService.distance(latitude1, longitude1, latitude2, longitude2, "K");
+        System.out.println("Distance between two locations is :" + distance);
+
+        if(Timestampdiff>3 && distance>1000){
+            System.out.println("fraudulent transaction");
+        }
+        else {
+            System.out.println("genuine transaction");
+
         }
 //        Location currentTransactionLocation = itemService.getLocation();
         TransactionDetails obj=patternAnalysisService.saveTransaction(transactionDetails);
         System.out.println(obj);
+
         return new ResponseEntity<TransactionDetails>(obj,HttpStatus.OK);
     }
+
 
     @PostMapping("Ipaddress")
     public ResponseEntity<IPAddress> saveIpAddress(@RequestBody IPAddress ipAddress){

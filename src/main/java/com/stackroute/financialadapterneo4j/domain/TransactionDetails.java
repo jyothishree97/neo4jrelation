@@ -3,12 +3,10 @@ package com.stackroute.financialadapterneo4j.domain;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
-import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -7,6 +7,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BillingDetailsRepository extends Neo4jRepository<BillingDetails , String> {
-//    @Query("CREATE (i:Billing) SET i.bill_id= {bill_id}, i.billing_address = {billing_address}")
-//    BillingDetails billingDetailNode(String bill_id, String billing_address);
 }

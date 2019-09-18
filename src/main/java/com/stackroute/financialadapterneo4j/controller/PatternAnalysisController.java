@@ -1,5 +1,6 @@
 package com.stackroute.financialadapterneo4j.controller;
 
+import com.ibm.common.activitystreams.Activity;
 import com.stackroute.financialadapterneo4j.domain.*;
 import com.stackroute.financialadapterneo4j.repositories.BillingDetailsRepository;
 import com.stackroute.financialadapterneo4j.repositories.IpAddressRepository;
@@ -11,9 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static com.ibm.common.activitystreams.Makers.activity;
+import static com.ibm.common.activitystreams.Makers.object;
 
 @RestController
 @RequestMapping("api/v1/")
@@ -28,41 +32,48 @@ public class PatternAnalysisController {
 
 
     @Autowired
-    public PatternAnalysisController(PatternAnalysisService patternAnalysisService,ItemService itemService, CardDetailService cardDetailService,BillingDetailService billingDetailService){
-        this.patternAnalysisService=patternAnalysisService;
-        this.itemService=itemService;
-        this.cardDetailService=cardDetailService;
-        this.billingDetailService=billingDetailService;
+    public PatternAnalysisController(PatternAnalysisService patternAnalysisService, ItemService itemService, CardDetailService cardDetailService, BillingDetailService billingDetailService) {
+        this.patternAnalysisService = patternAnalysisService;
+        this.itemService = itemService;
+        this.cardDetailService = cardDetailService;
+        this.billingDetailService = billingDetailService;
     }
 
     @GetMapping("item")
-    public ResponseEntity<Iterable<TransactionDetails>>  getByNo_Of_Items (String transaction_holder_name){
+    public ResponseEntity<Iterable<TransactionDetails>> getByNo_Of_Items(String transaction_holder_name) {
         System.out.println(transaction_holder_name);
         System.out.println("inside controller method*******");
         Iterable<TransactionDetails> items = patternAnalysisService.findByno_of_items(transaction_holder_name);
         System.out.println(items);
-        return new ResponseEntity<>(patternAnalysisService.findByno_of_items(transaction_holder_name),HttpStatus.OK);
+        return new ResponseEntity<>(patternAnalysisService.findByno_of_items(transaction_holder_name), HttpStatus.OK);
     }
 
     @GetMapping("transactions/{transaction_holder_name}")
-    public ResponseEntity<List<TransactionDetails>>  getTransactions(@PathVariable ("transaction_holder_name") String transaction_holder_name){
+    public ResponseEntity<List<TransactionDetails>> getTransactions(@PathVariable("transaction_holder_name") String transaction_holder_name) {
         List<TransactionDetails> transactionDetails = patternAnalysisService.findTransactions(transaction_holder_name);
         System.out.println(transactionDetails);
-        return new ResponseEntity<>(patternAnalysisService.findTransactions(transaction_holder_name),HttpStatus.OK);
+        return new ResponseEntity<>(patternAnalysisService.findTransactions(transaction_holder_name), HttpStatus.OK);
     }
 
     @GetMapping("transaction/{transaction_holder_name}")
-    public ResponseEntity<Iterable<IPAddress>>  getByName(@PathVariable("transaction_holder_name") String transaction_holder_name) {
-        Iterable<IPAddress> transactionDetails=patternAnalysisService.findByName(transaction_holder_name);
+    public ResponseEntity<Iterable<IPAddress>> getByName(@PathVariable("transaction_holder_name") String transaction_holder_name) {
+        Iterable<IPAddress> transactionDetails = patternAnalysisService.findByName(transaction_holder_name);
         System.out.println(transactionDetails);
-        return new ResponseEntity<>(patternAnalysisService.findByName(transaction_holder_name),HttpStatus.OK);
+        return new ResponseEntity<>(patternAnalysisService.findByName(transaction_holder_name), HttpStatus.OK);
+    }
+
+    @GetMapping("trans/{transaction_holder_name}")
+    public ResponseEntity<Iterable<TransactionDetails>> getName(@PathVariable("transaction_holder_name") String transaction_holder_name) {
+        Iterable<TransactionDetails> transactionDetails = patternAnalysisService.savedDetails(transaction_holder_name);
+        System.out.println(transactionDetails);
+        return new ResponseEntity<>(patternAnalysisService.savedDetails(transaction_holder_name), HttpStatus.OK);
     }
 
     @GetMapping("carddetails")
-    public ResponseEntity<Iterable<CardDetails>> getCardDetails(String card_no){
-        Iterable<CardDetails> cardDetails=patternAnalysisService.findCardDetails();
+    public ResponseEntity<Iterable<CardDetails>> getCardDetails(String card_no) {
+        Iterable<CardDetails> cardDetails = patternAnalysisService.findCardDetails();
         System.out.println(cardDetails);
-        return new ResponseEntity<>(patternAnalysisService.findCardDetails(),HttpStatus.OK);
+        return new ResponseEntity<>(patternAnalysisService.findCardDetails(), HttpStatus.OK);
     }
 
     @Autowired
@@ -71,101 +82,98 @@ public class PatternAnalysisController {
 
 
     @PostMapping("transactions")
-    public ResponseEntity<TransactionDetails> saveTransactions(@RequestBody TransactionDetails transactionDetails)
-    {
+    public Activity saveTransactions(@RequestBody TransactionDetails transactionDetails) {
+        List<TransactionDetails> list = new ArrayList();
+        list = patternAnalysisService.findTransactions(transactionDetails.getTransaction_holder_name());
+
         String newTransactionTimeStamp = transactionDetails.getTimestamp();
+        String holder = transactionDetails.getTransaction_holder_name();
+        logger.info(holder);
         logger.info("New Transaction TimeStamp: " + newTransactionTimeStamp);
         String oldTransactionTimeStamp = "";
         logger.info("Transaction holder: " + transactionDetails.getTransaction_holder_name());
         logger.info("Old Transactions: " + patternAnalysisService.findTransactions(transactionDetails.getTransaction_holder_name()).toString());
-        for (TransactionDetails oldTransaction : patternAnalysisService.findTransactions(transactionDetails.getTransaction_holder_name())) {
-            oldTransactionTimeStamp = oldTransaction.getTimestamp();
-        }
-        logger.info("Old Transaction TimeStamp: " + oldTransactionTimeStamp);
-        long Timestampdiff=itemService.calculateDateDifference(oldTransactionTimeStamp,newTransactionTimeStamp);
-        System.out.println("Difference between two timestamps is: " + Timestampdiff);
-
-        Location currentTransactionLocation = null;
-
-
-        Double latitude1=null;
-        Double longitude1=null;
-        Double latitude2=null;
-        Double longitude2=null;
-
-
-        for (IPAddress ipAddress: transactionDetails.getIpAddress()) {
-            currentTransactionLocation = itemService.getLocation(ipAddress.getIpv4());
-             latitude1= currentTransactionLocation.getLatitude();
-             longitude1 = currentTransactionLocation.getLongitude();
-            System.out.println("Latitude of current location is"  + latitude1);
-            System.out.println("Longitude of current location is " + longitude1);
+        if (list != null && !list.isEmpty()) {
+            for (TransactionDetails oldTransaction : list) {
+                oldTransactionTimeStamp = oldTransaction.getTimestamp();
+            }
         }
 
+        if (!oldTransactionTimeStamp.isEmpty() || !oldTransactionTimeStamp.isBlank()) {
+            logger.info("Old Transaction TimeStamp: " + oldTransactionTimeStamp);
+            long Timestampdiff = itemService.calculateDateDifference(oldTransactionTimeStamp, newTransactionTimeStamp);
+            System.out.println("Difference between two timestamps is: " + Timestampdiff);
 
 
+            Location currentTransactionLocation = null;
 
-//        patternAnalysisService.findByName(transactionDetails.getTransaction_holder_name()).forEach(ipAddress -> {
-//            Location previousLocation = itemService.getLocation(ipAddress.getIpv4());
-//            itemService.compareLocations(currentTransactionLocation, previousLocation);
-//        });
-        for (IPAddress ipAddress : patternAnalysisService.findByName(transactionDetails.transaction_holder_name)) {
-            Location previousLocation = itemService.getLocation(ipAddress.getIpv4());
-             latitude2=previousLocation.getLatitude();
-             longitude2=previousLocation.getLongitude();
-            System.out.println("Latitude of previous location is" + latitude2);
-            System.out.println("longitude of previous location is" + longitude2);
-//            itemService.compareLocations(currentTransactionLocation, previousLocation);
 
-//            itemService.calculateDateDifference(newTransactionTimeStamp,oldTransactionTimeStamp);
+            Double latitude1 = null;
+            Double longitude1 = null;
+            Double latitude2 = null;
+            Double longitude2 = null;
+
+
+            for (IPAddress ipAddress : transactionDetails.getIpAddress()) {
+                currentTransactionLocation = itemService.getLocation(ipAddress.getIpv4());
+                latitude1 = currentTransactionLocation.getLatitude();
+                longitude1 = currentTransactionLocation.getLongitude();
+                System.out.println("Latitude of current location is" + latitude1);
+                System.out.println("Longitude of current location is " + longitude1);
+            }
+
+            Collection<IPAddress> ipAddressList = patternAnalysisService.findByName(transactionDetails.transaction_holder_name);
+
+            if (ipAddressList != null && !ipAddressList.isEmpty()) {
+                for (IPAddress ipAddress : ipAddressList) {
+                    Location previousLocation = itemService.getLocation(ipAddress.getIpv4());
+                    latitude2 = previousLocation.getLatitude();
+                    longitude2 = previousLocation.getLongitude();
+                    System.out.println("Latitude of previous location is" + latitude2);
+                    System.out.println("longitude of previous location is" + longitude2);
+                }
+            }
+
+
+            double distance = itemService.distance(latitude1, longitude1, latitude2, longitude2, "K");
+            System.out.println("Distance between two locations is :" + distance);
+
+            if (Timestampdiff > 3 && distance > 1000) {
+                System.out.println("fraudulent transaction");
+            } else {
+                System.out.println("genuine transaction");
+
+            }
         }
 
 
-        double distance=itemService.distance(latitude1, longitude1, latitude2, longitude2, "K");
-        System.out.println("Distance between two locations is :" + distance);
-
-        if(Timestampdiff>3 && distance>1000){
-            System.out.println("fraudulent transaction");
-        }
-        else {
-            System.out.println("genuine transaction");
-
-        }
-//        Location currentTransactionLocation = itemService.getLocation();
-        TransactionDetails obj=patternAnalysisService.saveTransaction(transactionDetails);
+        TransactionDetails obj = patternAnalysisService.saveTransaction(transactionDetails);
         System.out.println(obj);
-
-        return new ResponseEntity<TransactionDetails>(obj,HttpStatus.OK);
+        Activity activity=activity().actor("Finance").verb("Post").object(object("Fraud Detect Message").content(String.valueOf(obj))).get();
+        System.out.println(activity);
+        return activity;
     }
-
 
     @PostMapping("Ipaddress")
-    public ResponseEntity<IPAddress> saveIpAddress(@RequestBody IPAddress ipAddress){
+    public ResponseEntity<IPAddress> saveIpAddress(@RequestBody IPAddress ipAddress) {
         System.out.println(ipAddress);
         repository.createNode(ipAddress.getId(), ipAddress.getIpv4(), ipAddress.getIpv6());
-        return new ResponseEntity<IPAddress>(new IPAddress(),HttpStatus.OK);
+        return new ResponseEntity<IPAddress>(new IPAddress(), HttpStatus.OK);
     }
 
-//    @PostMapping("item")
-//    public ResponseEntity<Item> saveItem(@RequestBody Item item){
-//        System.out.println(item);
-//        itemService.itemNode(item);
-//        return new ResponseEntity<Item>(new Item(), HttpStatus.OK);
-//    }
-
     @PostMapping("card")
-    public ResponseEntity<CardDetails> saveCardDetails(@RequestBody CardDetails cardDetails){
+    public ResponseEntity<CardDetails> saveCardDetails(@RequestBody CardDetails cardDetails) {
         System.out.println(cardDetails);
         cardDetailService.cardDetailNode(cardDetails);
-        return new ResponseEntity<CardDetails>(cardDetailService.cardDetailNode(cardDetails),HttpStatus.OK);
+        return new ResponseEntity<CardDetails>(cardDetailService.cardDetailNode(cardDetails), HttpStatus.OK);
 
     }
 
     @PostMapping("billing")
-    public ResponseEntity<BillingDetails> saveBillingDetails(@RequestBody BillingDetails billingDetails){
+    public ResponseEntity<BillingDetails> saveBillingDetails(@RequestBody BillingDetails billingDetails) {
         System.out.println(billingDetails);
         billingDetailService.billingDetailNode(billingDetails);
-        return new ResponseEntity<BillingDetails>(new BillingDetails(),HttpStatus.OK);
+        return new ResponseEntity<BillingDetails>(new BillingDetails(), HttpStatus.OK);
 
     }
 }

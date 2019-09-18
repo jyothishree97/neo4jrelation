@@ -2,7 +2,6 @@ package com.stackroute.financialadapterneo4j.repositories;
 
 import com.stackroute.financialadapterneo4j.domain.CardDetails;
 import com.stackroute.financialadapterneo4j.domain.IPAddress;
-import com.stackroute.financialadapterneo4j.domain.Item;
 import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -24,6 +23,9 @@ public interface PatternAnalysis extends Neo4jRepository<TransactionDetails,Stri
 
     @Query("Match(c:CardDetails) return c")
     List<CardDetails> findCardDetails();
+
+    @Query("Match(t:transaction) where t.transaction_holder_name={transaction_holder_name} return t")
+    List<TransactionDetails> savedDetails(@Param("transaction_holder_name") String transaction_holder_name);
 
     @Query("Match(ip:Ip_address)-[is:is_used_for]->(t:Transaction) where t.transaction_id=ip.id and t.transaction_holder_name={transaction_holder_name} return ip")
     Collection<IPAddress> findByName(@Param("transaction_holder_name") String transaction_holder_name);

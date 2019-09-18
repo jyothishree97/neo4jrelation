@@ -6,6 +6,7 @@ import com.stackroute.financialadapterneo4j.domain.IPAddress;
 import com.stackroute.financialadapterneo4j.domain.TransactionDetails;
 import com.stackroute.financialadapterneo4j.repositories.PatternAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 
@@ -49,4 +50,10 @@ public class PatternAnalysisServiceImplementation implements PatternAnalysisServ
     public TransactionDetails saveTransaction(TransactionDetails transactionDetails) {
       return patternAnalysis.save(transactionDetails);
     }
+
+    @Override
+    public List<TransactionDetails> savedDetails(String transaction_holder_name){
+        return patternAnalysis.savedDetails(transaction_holder_name);
+    }
+
 }

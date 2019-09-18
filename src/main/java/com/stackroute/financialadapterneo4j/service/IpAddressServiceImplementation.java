@@ -15,6 +15,5 @@ public class IpAddressServiceImplementation implements IpAddressService {
     public IPAddress createNewIpAddressNode(IPAddress ipAddress) {
         System.out.println(ipAddress);
         return ipAddress;
-//        return ipAddressRepository.createNode(ipAddress.getId(), ipAddress.getIpv4(), ipAddress.getIpv6());
     }
 }

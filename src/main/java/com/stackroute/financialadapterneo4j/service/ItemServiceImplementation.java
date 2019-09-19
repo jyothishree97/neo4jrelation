@@ -1,4 +1,5 @@
 package com.stackroute.financialadapterneo4j.service;
+
 import com.stackroute.financialadapterneo4j.domain.Item;
 import com.stackroute.financialadapterneo4j.domain.Location;
 import com.stackroute.financialadapterneo4j.domain.LocationResponse;
@@ -6,6 +7,7 @@ import com.stackroute.financialadapterneo4j.repositories.ItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import java.lang.*;
 
 import java.text.SimpleDateFormat;
@@ -52,7 +54,7 @@ public class ItemServiceImplementation implements ItemService {
             d1 = format.parse(oldTransactionTimeStamp);
             d2 = format.parse(currentTransactionTimeStamp);
             //in milliseconds
-            long diff = d2.getTime() - d1.getTime();
+            long diff = d1.getTime() - d2.getTime();
             diffHours = diff / (60 * 60 * 1000) % 24;
         } catch (Exception e) {
             e.printStackTrace();

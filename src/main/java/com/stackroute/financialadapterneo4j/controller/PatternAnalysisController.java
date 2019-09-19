@@ -72,7 +72,7 @@ public class PatternAnalysisController {
 
     @GetMapping("carddetails/{transaction_holder_name}")
     public ResponseEntity<Iterable<CardDetails>> getCardDetails(@PathVariable("transaction_holder_name") String transaction_holder_name) {
-        Iterable<CardDetails> cardDetails =cardDetailService.findCardDetails(transaction_holder_name);
+        Iterable<CardDetails> cardDetails = cardDetailService.findCardDetails(transaction_holder_name);
         System.out.println(cardDetails);
         return new ResponseEntity<>(cardDetailService.findCardDetails(transaction_holder_name), HttpStatus.OK);
     }
@@ -100,9 +100,9 @@ public class PatternAnalysisController {
                 oldTransactionTimeStamp = oldTransaction.getTimestamp();
             }
         }
-        String message=null;
-        double distance=0;
-        long Timestampdiff=0;
+        String message = null;
+        double distance = 0;
+        long Timestampdiff = 0;
         if (!oldTransactionTimeStamp.isEmpty() || !oldTransactionTimeStamp.isBlank()) {
             logger.info("Old Transaction TimeStamp: " + oldTransactionTimeStamp);
             Timestampdiff = itemService.calculateDateDifference(oldTransactionTimeStamp, newTransactionTimeStamp);
@@ -143,27 +143,22 @@ public class PatternAnalysisController {
             System.out.println("Distance between two locations is :" + distance);
 
 
-
-            if (Timestampdiff > 3 && distance > 1000) {
+            if ((Timestampdiff==0||Timestampdiff > 3) && distance > 1000) {
                 System.out.println("fraudulent transaction");
-                message="fraudulent transaction";
+                message = "fraudulent transaction";
 
             } else {
                 System.out.println("genuine transaction");
-                message="genuine transaction";
+                message = "genuine transaction";
             }
         }
 
         TransactionDetails obj = patternAnalysisService.saveTransaction(transactionDetails);
         System.out.println(obj);
-        Activity activity=activity().object(String.valueOf(obj)).get();
+        Activity activity = activity().object(String.valueOf(obj)).get();
         System.out.println(activity);
-        POJO pojo=new POJO("finance","post",new ObjectTypes("FinanceMessage",String.valueOf(obj)),distance,Timestampdiff,message);
-        kafkaTemplate.send("finance",pojo);
-
-
-
-
+        POJO pojo = new POJO("finance", "post", new ObjectTypes("FinanceMessage", String.valueOf(obj)), distance, Timestampdiff, message);
+        kafkaTemplate.send("finance", pojo);
     }
 
     @PostMapping("Ipaddress")

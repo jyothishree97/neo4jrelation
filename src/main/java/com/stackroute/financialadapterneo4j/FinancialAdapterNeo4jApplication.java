@@ -11,7 +11,5 @@ public class FinancialAdapterNeo4jApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FinancialAdapterNeo4jApplication.class, args);
-
 	}
-
 }
